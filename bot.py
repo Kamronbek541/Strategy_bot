@@ -1,5 +1,6 @@
 import os
 import json
+from urllib.parse import urlencode
 import re
 import asyncio
 import pandas as pd
@@ -31,6 +32,8 @@ ADMIN_USER_ID = int(os.getenv("ADMIN_USER_ID"))
 PAYMENT_AMOUNT = 49
 # PAYMENT_AMOUNT = 1.5
 USDT_CONTRACT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955"
+NGROK_URL = "https://27ad91723790.ngrok-free.app" # <-- REPLACE THIS WITH YOUR NGROK URL
+YOUR_USDT_WALLET = os.getenv("YOUR_WALLET_ADDRESS")
 ASK_PROMO_COUNT, ASK_PROMO_DURATION = range(2)
 ASK_BROADCAST_MESSAGE, CONFIRM_BROADCAST = range(9, 11)
 
@@ -58,7 +61,7 @@ async def get_main_menu_keyboard(user_id):
 def get_all_translations(key: str) -> list:
     """Returns all possible translations for a key (used for button matching)."""
     variants = []
-    for lang in ['en', 'ru', 'uk']:
+    for lang in ['en', 'ru']:
         try:
             file_path = os.path.join("locales", f"{lang}.json")
             if os.path.exists(file_path):
@@ -515,7 +518,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     is_new_user = add_user(user.id, user.username, referrer_id)
     
     if is_new_user:
-        keyboard = [["🇬🇧 English", "🇷🇺 Русский"], ["🇺🇦 Українська"]]
+        keyboard = [["🇬🇧 English", "🇷🇺 Русский"]]
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
         # Initial prompt in English/Russian as we don't know the language yet
         await update.message.reply_text("Please select your language / Пожалуйста, выберите язык:", reply_markup=reply_markup)
@@ -630,7 +633,7 @@ async def my_exchanges_command(update: Update, context: ContextTypes.DEFAULT_TYP
             balance_str = "N/A"
 
         # Strategy Display Name
-        strat_disp = "TradeMax" if ex['strategy'] == 'cgt' else ex['strategy'].upper()
+        strat_disp = "Strategy 2 (spot)" if ex['strategy'] == 'cgt' else "Strategy 1 (futures)"
 
         risk_line = ""
         btn_key = "btn_edit_reserve"
@@ -673,7 +676,7 @@ async def my_exchanges_command(update: Update, context: ContextTypes.DEFAULT_TYP
 # --- LANGUAGE SELECTION FLOW ---
 async def change_language_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
-    keyboard = [["🇬🇧 English", "🇷🇺 Русский"], ["🇺🇦 Українська"], [get_text(user_id, "btn_back")]]
+    keyboard = [["🇬🇧 English", "🇷🇺 Русский"], [get_text(user_id, "btn_back")]]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
     await update.message.reply_text(get_text(user_id, "select_language"), reply_markup=reply_markup)
     return SELECT_LANG
@@ -684,8 +687,7 @@ async def set_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     lang_map = {
         "🇬🇧 English": "en",
-        "🇷🇺 Русский": "ru",
-        "🇺🇦 Українська": "uk"
+        "🇷🇺 Русский": "ru"
     }
     
     lang_code = lang_map.get(choice)
@@ -922,9 +924,40 @@ async def set_initial_language(update: Update, context: ContextTypes.DEFAULT_TYP
     return ConversationHandler.END
 
 async def top_up_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Показывает инструкцию по пополнению баланса."""
+    """
+    Generates a unique address via CryptAPI.
+    """
     user_id = update.effective_user.id
-    await update.message.reply_text(get_text(user_id, "msg_how_to_top_up", address=WALLET_ADDRESS), parse_mode=ParseMode.HTML)
+    await update.message.reply_text(get_text(user_id, "msg_generating_address"))
+
+    try:
+        # 1. Callback URL
+        callback_base = f"{NGROK_URL}/cryptapi_webhook"
+        callback_params = {'user_id': user_id, 'secret': 'SOME_SECRET_WORD_TO_VALIDATE'}
+        callback_url = f"{callback_base}?{urlencode(callback_params)}"
+
+        # 2. CryptAPI Request
+        api_url = "https://api.cryptapi.io/bep20/usdt/create/"
+        params = {
+            'callback': callback_url,
+            'address': YOUR_USDT_WALLET, 
+        }
+        
+        response = requests.get(api_url, params=params)
+        data = response.json()
+
+        if data.get('status') == 'success':
+            address_in = data['address_in']
+            min_deposit = data['minimum_transaction_coin']
+
+            msg = get_text(user_id, "msg_deposit_address", address=address_in, min_deposit=min_deposit)
+            await update.message.reply_text(msg, parse_mode=ParseMode.HTML)
+        else:
+            await update.message.reply_text(get_text(user_id, "err_generating_address"))
+
+    except Exception as e:
+        print(f"CryptAPI Error: {e}")
+        await update.message.reply_text(get_text(user_id, "msg_cryptapi_error"))
 
 # --- НОВАЯ ФУНКЦИЯ ДЛЯ ПРОВЕРКИ ПЛАТЕЖА ЗА ПОПОЛНЕНИЕ ---
 async def verify_top_up_payment(tx_hash: str, user_id: int) -> tuple[bool, str, float]:
@@ -1088,7 +1121,7 @@ async def ask_wallet(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def connect_exchange_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Сразу спрашиваем стратегию
     user_id = update.effective_user.id
-    keyboard = [["Bro-Bot (Futures)", "TradeMax (Spot)"], [get_text(user_id, "btn_cancel")]]
+    keyboard = [[get_text(user_id, "strata_btn_1"), get_text(user_id, "strata_btn_2")], [get_text(user_id, "btn_cancel")]]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
     await update.message.reply_text(
         get_text(user_id, "msg_select_strategy"),
@@ -1103,11 +1136,10 @@ async def ask_strategy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if choice in ["Cancel", get_text(user_id, "btn_cancel")]:
         return await cancel(update, context) # Вызываем функцию отмены
-    if choice == "Bro-Bot (Futures)":
+    if choice == get_text(user_id, "strata_btn_1") or choice == "Strategy 1 (Futures)":
         context.user_data['strategy'] = 'bro-bot'
-        # Показываем биржи для Ратнера (Localized & No MEXC)
+        # Показываем ONLY BingX for Strategy 1
         keyboard = [
-            [get_text(user_id, "btn_strat_binance"), get_text(user_id, "btn_strat_bybit")], 
             [get_text(user_id, "btn_strat_bingx")], 
             [get_text(user_id, "btn_back")]
         ]
@@ -1115,7 +1147,7 @@ async def ask_strategy(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(get_text(user_id, "msg_select_futures_exchange"), reply_markup=reply_markup)
         return ASK_EXCHANGE
 
-    elif choice == "TradeMax (Spot)":
+    elif choice == get_text(user_id, "strata_btn_2") or choice == "Strategy 2 (Spot)":
         context.user_data['strategy'] = 'cgt'
         # Показываем ТОЛЬКО OKX
         keyboard = [["OKX"], [get_text(user_id, "btn_back")]]
@@ -1280,7 +1312,7 @@ async def ask_exchange(update: Update, context: ContextTypes.DEFAULT_TYPE):
          return ASK_EXCHANGE
 
     # Валидация бирж
-    valid_bro_bot = ["Binance", "Bybit", "BingX"] # Removed MEXC
+    valid_bro_bot = ["BingX"] # Strategy 1 (Futures) -> BingX ONLY
     valid_cgt = ["OKX"]
     
     if strategy == 'bro-bot' and canonical_exchange not in valid_bro_bot:
@@ -1607,7 +1639,7 @@ async def ask_risk_finish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"✅ <b>Setup Complete!</b>\n\n"
         f"Strategy: <b>{strategy_disp}</b>\n"
         f"Risk per Trade: <b>{risk_pct}%</b>\n\n"
-        f"Aladdin is now ready to trade.",
+        f"Strategy Bot is now ready to trade.",
         reply_markup=reply_markup,
         parse_mode=ParseMode.HTML
     )
@@ -1739,7 +1771,7 @@ async def handle_admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE)
         f"Total Users: <b>{stats['total_users']}</b>\n"
         f"Active Subscribers: <b>{stats['active_users']}</b>\n"
         f"Pending Payment: <b>{stats['pending_payment']}</b>\n\n"
-        f"Total Token Balance (all users): <b>{stats['total_tokens']:.2f}</b>\n"
+        f"Total USDT Balance (all users): <b>{stats['total_tokens']:.2f}</b>\n"
         f"Pending Withdrawals: <b>{stats['pending_withdrawals_count']}</b> requests for <b>{stats['pending_withdrawals_sum']:.2f}</b> USDT.\n\n"
         f"🎟️ <b>Promo Codes Stats:</b>\n"
         f"Total Codes: <b>{stats['total_promo_codes']}</b>\n"
@@ -1907,7 +1939,7 @@ async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
     # --- ПРОВЕРКА НА ПРОМОКОД ---
     # --- ПРОВЕРКА НА ПРОМОКОД ---
-    if text.upper().startswith("ALADDIN-"):
+    if text.upper().startswith("RATNER-") or text.upper().startswith("ALADDIN-"):
         if get_user_status(user_id) == 'active':
             await update.message.reply_text(get_text(user_id, "err_account_already_active")); return
 
@@ -2227,7 +2259,7 @@ def main():
     job_queue.run_daily(daily_subscription_check, time=datetime.strptime("00:05", "%H:%M").time())
     # Withdrawal conversation handler
     withdraw_conv_handler = ConversationHandler(
-        entry_points=[MessageHandler(filters.Regex('^Withdraw Tokens 💰$|' + '|'.join([f"^{v}$" for v in get_all_translations("btn_withdraw")])), withdraw_start)],  
+        entry_points=[MessageHandler(filters.Regex('^Withdraw USDT 💸$|' + '|'.join([f"^{v}$" for v in get_all_translations("btn_withdraw")])), withdraw_start)],  
         states={
             ASK_AMOUNT: [MessageHandler(filters.Regex('^Cancel$'), cancel), MessageHandler(filters.TEXT & ~filters.COMMAND, ask_amount)],
             ASK_WALLET: [ MessageHandler(filters.Regex('^Cancel$'), cancel), MessageHandler(filters.TEXT & ~filters.COMMAND, ask_wallet)],

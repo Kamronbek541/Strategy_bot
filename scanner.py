@@ -54,9 +54,9 @@ async def scan_market_and_notify(bot: Bot):
     print(f"Found {len(found_ideas)} actionable ideas. Notifying {len(user_ids)} users...")
 
     if not found_ideas:
-        message_text = "🧞‍♂️ **Aladdin's Market Scan | No setups**\n\nNo high-quality trade setups found in the last scan. The market is consolidating."
+        message_text = "🧞‍♂️ **Strategy Bot Market Scan | No setups**\n\nNo high-quality trade setups found in the last scan. The market is consolidating."
     else:
-        header = f"🧞‍♂️ **Aladdin's Market Scan | Top {len(found_ideas)} Ideas**\n\n"
+        header = f"🧞‍♂️ **Strategy Bot Market Scan | Top {len(found_ideas)} Ideas**\n\n"
         idea_messages = [format_plan_to_message(idea) for idea in found_ideas]
         message_text = header + "\n\n---\n\n".join(idea_messages)
 

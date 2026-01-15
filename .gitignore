@@ -11,3 +11,4 @@ __pycache__/
 
 # Файлы, генерируемые ботом
 chart_for_*.jpg
+webapp/

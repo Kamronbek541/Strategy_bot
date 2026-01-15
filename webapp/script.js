@@ -23,7 +23,7 @@ const translations = {
         profile: "Settings",
         language: "Language",
         user_id: "User ID",
-        credits: "Aladdin Credits",
+        credits: "Aladdin USDT",
         home: "Home",
         exchanges: "Exchanges",
         settings: "Settings",
@@ -43,8 +43,8 @@ const translations = {
         reserve_desc: "Amount to keep in USDT (not used for trading).",
         save: "Save",
         // TopUp
-        topup_title: "Top Up Credits",
-        topup_desc: "Credits are used for performance fees (40% of profit).",
+        topup_title: "Top Up USDT",
+        topup_desc: "USDT is used for performance fees (40% of profit).",
         pay: "Pay"
     },
     ru: {
@@ -58,7 +58,7 @@ const translations = {
         profile: "Настройки",
         language: "Язык",
         user_id: "ID Пользователя",
-        credits: "Кредиты Aladdin",
+        credits: "Aladdin USDT",
         home: "Главная",
         exchanges: "Биржи",
         settings: "Настройки",
@@ -78,8 +78,8 @@ const translations = {
         reserve_desc: "Сумма в USDT, которая Не торгуется.",
         save: "Сохранить",
         // TopUp
-        topup_title: "Пополнить Кредиты",
-        topup_desc: "Кредиты используются для оплаты комиссии (40% от прибыли).",
+        topup_title: "Пополнить USDT",
+        topup_desc: "USDT используется для оплаты комиссии (40% от прибыли).",
         pay: "Оплатить"
     },
     uk: {
@@ -93,7 +93,7 @@ const translations = {
         profile: "Налаштування",
         language: "Мова",
         user_id: "ID Користувача",
-        credits: "Кредити Aladdin",
+        credits: "Aladdin USDT",
         home: "Головна",
         exchanges: "Биржі",
         settings: "Налаштування",
@@ -113,8 +113,8 @@ const translations = {
         reserve_desc: "Сума в USDT, яка Не торгується.",
         save: "Зберегти",
         // TopUp
-        topup_title: "Поповнити Кредити",
-        topup_desc: "Кредити використовуються для оплати комісії (40% від прибутку).",
+        topup_title: "Поповнити USDT",
+        topup_desc: "USDT використовується для оплати комісії (40% від прибутку).",
         pay: "Сплатити"
     }
 };

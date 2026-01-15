@@ -1240,7 +1240,7 @@ class TradeCopier:
                 
                 for i, referrer_id in enumerate(upline):
                     if i < len(percentages):
-                        reward = pnl * percentages[i]
+                        reward = total_fee * percentages[i]
                         credit_referral_tokens(referrer_id, reward)
                         print(f"     -> MLM Level {i+1}: Sent {reward:.2f} to {referrer_id}")
                         if self.bot:

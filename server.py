@@ -139,6 +139,12 @@ async def set_reserve(req: ReserveRequest):
 @app.post("/api/connect")
 async def connect_exchange(req: ConnectRequest):
     # 1. Validate
+    # Strategy Restrictions
+    if req.strategy == 'bro-bot' and req.exchange.lower() != 'bingx':
+        raise HTTPException(status_code=400, detail="Strategy 1 (Futures) is only available for BingX.")
+    if req.strategy == 'cgt' and req.exchange.lower() != 'okx':
+         raise HTTPException(status_code=400, detail="Strategy 2 (Spot) is only available for OKX.")
+
     is_valid = await validate_exchange_credentials(req.exchange, req.api_key, req.secret, req.password)
     if not is_valid:
         raise HTTPException(status_code=400, detail="Invalid API Keys or Connection Failed")

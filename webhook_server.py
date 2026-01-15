@@ -51,7 +51,7 @@ async def handle_nowpayments_webhook(request: Request, x_nowpayments_sig: str = 
             activate_user(user_id)
             
             # 4. Отправляем ему сообщение об успехе
-            success_message = "✅ Payment successful!\n\nWelcome to Aladdin! You can now use all my features. Press 'Analyze Chart 📈' to begin."
+            success_message = "✅ Payment successful!\n\nWelcome to Strategy Bot! You can now use all my features. Press 'Analyze Chart 📈' to begin."
             await bot.send_message(chat_id=user_id, text=success_message)
             
             return {"status": "success"}

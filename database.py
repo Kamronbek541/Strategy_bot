@@ -832,7 +832,7 @@ def create_withdrawal_request(user_id: int, amount: float, wallet: str) -> bool:
 def generate_promo_codes(count: int, duration_days: int) -> list[str]:
     codes = []
     for _ in range(count): 
-        c = f"ALADDIN-{uuid.uuid4().hex[:4].upper()}-{uuid.uuid4().hex[:4].upper()}"
+        c = f"RATNER-{uuid.uuid4().hex[:4].upper()}-{uuid.uuid4().hex[:4].upper()}"
         execute_write_query("INSERT OR IGNORE INTO promo_codes (code, duration_days) VALUES (?, ?)", (c, duration_days))
         codes.append(c)
     return codes

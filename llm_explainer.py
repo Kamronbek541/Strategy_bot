@@ -18,7 +18,7 @@
 
 #     # --- Собираем промпт для GPT ---
 #     system_prompt = (
-#         "You are Aladdin, a professional crypto trading analyst. Your task is to explain the rationale "
+#         "You are Strategy Bot (RATNER), a professional crypto trading analyst. Your task is to explain the rationale "
 #         "behind a trade signal in a clear, structured, and educational manner. "
 #         "Explain the contributing factors. Be neutral and objective. "
 #         "NEVER promise profits or give direct financial advice. Always include a disclaimer."
@@ -87,7 +87,7 @@ def get_explanation(context: dict, lang: str = "en") -> str:
         return "Explanation feature is unavailable (API key is missing)."
 
     system_prompt = (
-        "You are Aladdin, a professional crypto trading analyst. "
+        "You are Strategy Bot (RATNER), a professional crypto trading analyst. "
         "Analyze the provided technical data and explain the trade signal. "
         "Be concise, professional, and logical. "
         "Structure: 1. Market Context, 2. Key Drivers (Indicators), 3. Risk Warning. "
