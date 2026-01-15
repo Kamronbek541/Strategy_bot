@@ -33,7 +33,7 @@
     "select_language": "Please select your language:",
     "language_set": "✅ Language set to English",
     "invalid_selection": "Invalid selection.",
-    "welcome_back": "Welcome to Strategy Bot (RATNER)! 🧞‍♂️\n\nI am your personal crypto assistant.\n\n🚀 <b>Copy Trading</b>: Connect your exchange (BingX or OKX) to automatically copy trades.\n💰 <b>Referral System</b>: Invite friends and earn % from their trading fees.\n\nUse the menu below to get started!",
+    "welcome_back": "Welcome to TradeFlow AI! 🤖\n\nI am your personal AI crypto assistant.\n\n🚀 <b>Copy Trading</b>: Connect your exchange (BingX or OKX) to automatically copy trades.\n💰 <b>Referral System</b>: Invite friends and earn % from their trading fees.\n\nUse the menu below to get started!",
     "err_tx_used": "❌ Verification failed.\nReason: This transaction has already been used.",
     "err_invalid_api": "❌ Verification failed.\nReason: Invalid response from blockchain explorer.",
     "err_api_key_invalid": "❌ Verification failed.\nReason: API Key is invalid. Please contact support.",
