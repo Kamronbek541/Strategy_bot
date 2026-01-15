@@ -1,0 +1,14 @@
+python-telegram-bot[job-queue]
+python-dotenv
+ccxt
+pandas
+pandas_ta
+opencv-python
+scikit-image
+pytesseract
+openai
+requests
+binance-futures-connector
+pybit
+websocket-client
+cryptography

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aladdin Bot</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&family=Orbitron:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- === PAGE: HOME === -->
+    <div id="home" class="page active animate-enter">
+        <header>
+            <div class="user-info">
+                <img id="user-avatar" src="https://ui-avatars.com/api/?name=Aladdin&background=A500E1&color=fff"
+                    class="avatar">
+                <div>
+                    <div class="text-caption" data-i18n="welcome">Welcome Back</div>
+                    <div id="user-name" class="item-title">Trader</div>
+                </div>
+            </div>
+            <!-- Settings Icon -->
+            <div onclick="document.querySelectorAll('.nav-item')[2].click()" style="font-size:24px; cursor:pointer;">⚙️
+            </div>
+        </header>
+
+        <section class="balance-section">
+            <div class="balance-label" data-i18n="total_balance">Total Portfolio Balance</div>
+            <div id="total-balance" class="balance-amount">$0.00</div>
+            <div class="balance-change">▲ +0.0% (24h)</div>
+        </section>
+
+        <section class="actions animate-enter delay-1">
+            <div class="btn-action" data-action="topup">
+                <span class="btn-icon">💰</span>
+                <span class="btn-label" data-i18n="top_up">Top Up</span>
+            </div>
+            <div class="btn-action" id="btn-copy-trading">
+                <span class="btn-icon">🧞‍♂️</span>
+                <span class="btn-label" data-i18n="copy_trading">Copy Trading</span>
+            </div>
+        </section>
+
+        <div style="padding: 24px 20px 0;">
+            <div class="card animate-enter delay-2">
+                <div class="list-header" style="padding:0 0 16px;" data-i18n="active_strategies">Active Strategies</div>
+                <div id="active-strategies-list">
+                    <div style="text-align:center; padding:10px; color:#666;">No active strategies</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- === PAGE: EXCHANGES === -->
+    <div id="exchanges" class="page">
+        <header>
+            <h1 data-i18n="my_exchanges">My Exchanges</h1>
+        </header>
+        <div style="padding: 0 20px;">
+            <div id="exchange-list" class="card">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- === PAGE: PROFILE === -->
+    <div id="profile" class="page">
+        <header>
+            <h1 data-i18n="settings">Settings</h1>
+        </header>
+        <div style="padding: 20px;">
+            <div class="card">
+                <div class="list-item">
+                    <div class="item-content" data-i18n="user_id">User ID</div>
+                    <div class="item-value" id="user-id-disp">Loading...</div>
+                </div>
+                <div class="list-item">
+                    <div class="item-content" data-i18n="credits">Aladdin Credits</div>
+                    <div class="item-value text-gold" id="credits-bal">0.00</div>
+                </div>
+
+                <!-- Language Selector -->
+                <div class="list-header" style="padding: 10px 0;" data-i18n="language">Language</div>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <div class="btn-action lang-btn" data-lang="en" style="flex:1; padding:10px;">🇬🇧 EN</div>
+                    <div class="btn-action lang-btn" data-lang="ru" style="flex:1; padding:10px;">🇷🇺 RU</div>
+                    <div class="btn-action lang-btn" data-lang="uk" style="flex:1; padding:10px;">🇺🇦 UK</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- === WIZARD MODAL === -->
+    <div id="modal-wizard" class="modal-overlay">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 id="wizard-title" data-i18n="wiz_title">Setup</h2>
+                <div id="btn-close-wizard" style="font-size:24px; cursor:pointer;">✕</div>
+            </div>
+
+            <form id="form-wizard-api" onsubmit="return false;">
+                <!-- Step 1: Strategy -->
+                <div id="step-1" class="wizard-step">
+                    <div class="strategy-card" data-strategy="bro-bot">
+                        <div class="item-title" data-i18n="strat_ratner">Bro-Bot (Futures)</div>
+                        <div class="text-sm" data-i18n="strat_ratner_desc">Binance, Bybit, BingX</div>
+                    </div>
+                    <div class="strategy-card" data-strategy="cgt">
+                        <div class="item-title" data-i18n="strat_cgt">TradeMax (Spot)</div>
+                        <div class="text-sm" data-i18n="strat_cgt_desc">OKX Only</div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Exchange -->
+                <div id="step-2" class="wizard-step" style="display:none;">
+                    <h2 style="margin-bottom:20px; text-align:center;">Select Exchange</h2>
+                    <div class="exchange-grid">
+                        <!-- Binance -->
+                        <div class="exchange-option" data-exchange="binance" data-filter="bro-bot">
+                            <img src="logo_bots/binance.png?v=2" class="exchange-logo"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                            <div class="exchange-logo-fallback" style="font-size:30px; display:none">🔸</div>
+                            <div class="exchange-name">Binance</div>
+                        </div>
+                        <!-- OKX -->
+                        <div class="exchange-option" data-exchange="okx" data-filter="cgt">
+                            <img src="logo_bots/okx.png?v=2" class="exchange-logo"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                            <div class="exchange-logo-fallback" style="font-size:30px; display:none">⚫</div>
+                            <div class="exchange-name">OKX</div>
+                        </div>
+                        <!-- Bybit -->
+                        <div class="exchange-option" data-exchange="bybit" data-filter="bro-bot">
+                            <img src="logo_bots/bybit.png?v=2" class="exchange-logo"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                            <div class="exchange-logo-fallback" style="font-size:30px; display:none">⬛</div>
+                            <div class="exchange-name">Bybit</div>
+                        </div>
+                        <!-- BingX -->
+                        <div class="exchange-option" data-exchange="bingx" data-filter="bro-bot">
+                            <img src="logo_bots/bingx.png?v=2" class="exchange-logo"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                            <div class="exchange-logo-fallback" style="font-size:30px; display:none">🟦</div>
+                            <div class="exchange-name">BingX</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: API Keys & Reserve -->
+                <div id="step-3" class="wizard-step" style="display:none;">
+                    <div class="input-group">
+                        <label class="input-label">API Key</label>
+                        <input type="text" id="inp-key" class="input-field" placeholder="Paste API Key">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Secret Key</label>
+                        <input type="password" id="inp-secret" class="input-field" placeholder="Paste Secret Key">
+                    </div>
+                    <div class="input-group" id="group-pass" style="display:none;">
+                        <label class="input-label">Passphrase</label>
+                        <input type="password" id="inp-pass" class="input-field">
+                    </div>
+                    <div class="input-group" style="margin-top:20px; border-top:1px solid #333; padding-top:10px;">
+                        <label class="input-label text-gold" data-i18n="reserve_title">Reserve Amount (USDT)</label>
+                        <input type="number" id="inp-reserve-init" class="input-field" placeholder="0.00">
+                        <div class="text-caption" style="margin-top:4px;" data-i18n="reserve_desc">Amount NOT to trade
+                        </div>
+                    </div>
+
+                    <button id="btn-submit-api" class="btn-primary" data-i18n="btn_connect">Connect</button>
+                </div>
+            </form>
+
+            <!-- Step 4: Success -->
+            <div id="step-4" class="wizard-step" style="display:none; text-align:center;">
+                <div style="font-size:50px; margin-bottom:20px;">✅</div>
+                <h3 data-i18n="success">Success!</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- === RESERVE MODAL === -->
+    <div id="modal-reserve" class="modal-overlay">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 data-i18n="reserve_title">Set Reserve</h2>
+                <div id="btn-close-reserve" style="font-size:24px; cursor:pointer;">✕</div>
+            </div>
+            <div style="margin-bottom:20px; text-align:center; color:#888;" id="reserve-exchange-title">EXCHANGE</div>
+
+            <div class="input-group">
+                <label class="input-label">USDT Amount</label>
+                <input type="number" id="inp-reserve-edit" class="input-field" placeholder="0.00">
+            </div>
+
+            <button id="btn-save-reserve" class="btn-primary" data-i18n="save">Save</button>
+        </div>
+    </div>
+
+    <!-- === TOPUP MODAL === -->
+    <div id="modal-topup" class="modal-overlay">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 data-i18n="topup_title">Top Up Credits</h2>
+                <div id="btn-close-topup" style="font-size:24px; cursor:pointer;">✕</div>
+            </div>
+            <div class="text-sm" style="margin-bottom:16px; color:#888; line-height:1.5;">
+                <b style="color:#fff;">1. Send USDT (BEP-20)</b> to this address:<br>
+                <div class="copy-box" onclick="copyAddress()"
+                    style="background:#1c212b; padding:12px; border-radius:12px; margin-top:8px; word-break:break-all; font-family:monospace; color:var(--primary); cursor:pointer; border:1px dashed #444;">
+                    0x6c639cac616254232d9c4d51b1c3646132b46c4a
+                    <span style="float:right">📋</span>
+                </div>
+                <br>
+                <b style="color:#fff;">2. Paste Transaction Hash (TxID)</b> below:
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="inp-topup-txid" class="input-field" placeholder="0x..." style="font-size:14px;">
+            </div>
+
+            <button id="btn-pay" class="btn-primary">Verify Transaction</button>
+        </div>
+    </div>
+
+    <!-- === BOTTOM NAV === -->
+    <nav class="bottom-nav animate-enter delay-3">
+        <div class="nav-item active" data-target="home">
+            <div class="nav-icon">🏠</div>
+            <div data-i18n="home">Home</div>
+        </div>
+        <div class="nav-item" data-target="exchanges">
+            <div class="nav-icon">🏦</div>
+            <div data-i18n="exchanges">Exchanges</div>
+        </div>
+        <div class="nav-item" data-target="profile">
+            <div class="nav-icon">👤</div>
+            <div data-i18n="profile">Profile</div>
+        </div>
+    </nav>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
